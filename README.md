@@ -15,6 +15,14 @@ The project implements channel equalization using a transmitted known BPSK-mappe
 The sent BPSK training symbols/QPSK data symbols can be visualized at the transmitted and receiver, as well as the raw time/frequency signal. 
 The bit error rate (BER) is computed at the end of the transmission, which can consist of multiple frames.
 
+### Results
+Below are some of the results obtained using various methods.
+<p align="center">
+  <img src=pictures/readme.png width="380">
+<p align="center"
+</p>
+Fig.1 : Results
+</p>
 
 
 ## License
