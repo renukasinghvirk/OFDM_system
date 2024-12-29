@@ -1,9 +1,30 @@
 function [beginning_of_data, phase_of_peak, magnitude_of_peak] = find_preamble(rx_signal, conf)
-    % note that this function only works for noisy signal !!!
-    % Frame synchronizer.
-    % rx_signal is the noisy received signal, and L is the oversampling factor 
-    % (L=1 in chapter 2, L=4 in all later chapters).
-    % The returned value is the index of the first data symbol in rx_signal.
+%   FIND_PREAMBLE Frame synchronizer for noisy OFDM signals.
+%   Identifies the index of the first data symbol in the received noisy signal
+%   using a frame synchronization sequence. Also computes the phase and
+%   magnitude of the detected peak for synchronization.
+%
+%   INPUTS:
+%   - rx_signal: The noisy received signal.
+%   - conf: Configuration struct containing:
+%       * npreamble: Length of the frame synchronization sequence.
+%       * os_factor_preamble: Oversampling factor (L).
+%       * plot: Boolean flag to enable/disable visualization of test statistic T.
+%
+%   OUTPUTS:
+%   - beginning_of_data: Index of the first data symbol in `rx_signal`.
+%   - phase_of_peak: Phase of the peak detection (radians).
+%   - magnitude_of_peak: Magnitude of the peak normalized by preamble length.
+%
+%   The function performs the following steps:
+%   1. Generates a frame synchronization sequence using an LFSR (mapped to BPSK).
+%   2. Computes the test statistic T for each candidate position in `rx_signal`.
+%   3. Detects the peak based on a predefined detection threshold.
+%   4. Outputs the synchronization information, including peak properties.
+%   5. Optionally visualizes the test statistic T to evaluate detection.
+%
+%   Note: The function is designed for noisy signals and may not work on
+%   noise-free signals.
 
     if (rx_signal(1) == 0)
         warning('Signal seems to be noise-free. The frame synchronizer will not work in this case.');
@@ -56,20 +77,21 @@ function [beginning_of_data, phase_of_peak, magnitude_of_peak] = find_preamble(r
     end
 
     % Plot T values to justify the threshold choice
-    fontsize=30;
-    figure('Units', 'pixels', 'Position', [100, 100, 800, 400]);
-    plot(T_indices, T_values(T_indices), 'b', 'LineWidth', 1.5); % Plot test statistic T values
-    hold on;
-    yline(detection_threshold, 'r--', 'LineWidth', 1.5); % Plot the threshold line
-    text(T_indices(end), detection_threshold, 'Threshold', 'FontSize', fontsize/2, 'HorizontalAlignment', 'right', 'VerticalAlignment', 'bottom', 'Color', 'r');
-    legend('Test Statistic T', 'Detection Threshold', 'Location', 'Best');
-    title('Test Statistic T vs. Sample Index', 'FontSize', fontsize);
-    xlabel('Sample Index', 'FontSize', fontsize);
-    ylabel('Test Statistic Magnitude', 'FontSize', fontsize);
-    ax = gca; % Get current axes
-    ax.FontSize = 20; % Set font size for axis tick labels
-    grid on;
-
+    if conf.plot
+        fontsize=30;
+        figure('Units', 'pixels', 'Position', [100, 100, 800, 400]);
+        plot(T_indices, T_values(T_indices), 'b', 'LineWidth', 1.5); % Plot test statistic T values
+        hold on;
+        yline(detection_threshold, 'r--', 'LineWidth', 1.5); % Plot the threshold line
+        text(T_indices(end), detection_threshold, 'Threshold', 'FontSize', fontsize/2, 'HorizontalAlignment', 'right', 'VerticalAlignment', 'bottom', 'Color', 'r');
+        legend('Test Statistic T', 'Detection Threshold', 'Location', 'Best');
+        title('Test Statistic T vs. Sample Index', 'FontSize', fontsize);
+        xlabel('Sample Index', 'FontSize', fontsize);
+        ylabel('Test Statistic Magnitude', 'FontSize', fontsize);
+        ax = gca; % Get current axes
+        ax.FontSize = 20; % Set font size for axis tick labels
+        grid on;
+    end
     % If no synchronization sequence is found, raise an error
     if ~exist('beginning_of_data', 'var')
         error('No synchronization sequence found.');

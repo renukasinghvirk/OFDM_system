@@ -1,5 +1,5 @@
 function [data_osffts, corr_data_osffts] = naive_phase_correction(training_osfft, tx_training_symbols, rxsignal_bb, conf, training_end, cp_len, ofdm_symbol_len)
-% NAIVE_PHASE_CORRECTION Processes OFDM signals with phase correction only
+%   NAIVE_PHASE_CORRECTION Processes OFDM signals with phase correction only
 %   This function computes phase offsets between training symbols,
 %   isolates data OFDM signals, and applies phase correction (without magnitude correction).
 %   Raw symbols are also normalized to the unit circle.

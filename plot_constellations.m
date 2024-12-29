@@ -1,4 +1,22 @@
 function plot_constellations(symbols, plot_title)
+%   PLOT_CONSTELLATIONS Plots the constellation diagram of transmitted/received symbols.
+%   This function visualizes the complex symbols in the I-Q plane, highlighting
+%   the first, intermediate, and last symbols with different colors and markers.
+%   It also overlays a unit circle to help analyze phase and magnitude distortions.
+%
+%   INPUTS:
+%   - symbols: A vector of complex values representing the transmitted or received symbols.
+%   - plot_title: A string specifying the title for the plot.
+%
+%   OUTPUTS:
+%   - None. The function generates and displays the constellation plot.
+%
+%   Features:
+%   1. Plots intermediate symbols as blue crosses.
+%   2. Highlights the first symbol in red and the last symbol in green.
+%   3. Draws a dashed unit circle for reference.
+%   4. Adds grid, axis labels, and a customizable title.
+
     % Convert to pixels
     figure('Units', 'pixels', 'Position', [100, 100, 500, 500]);
     

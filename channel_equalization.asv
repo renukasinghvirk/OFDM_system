@@ -1,5 +1,5 @@
 function [corr_data_osffts, H_estimated] = channel_equalization(training_osfft, tx_training_symbols, data_osffts, conf)
-%   CHANNEL_EQUALIZATION Equalizes OFDM data symbols for each packet
+% CHANNEL_EQUALIZATION Equalizes OFDM data symbols for each packet
 %
 %   This function performs channel equalization by estimating the channel 
 %   frequency response using training symbols, correcting the received data
@@ -30,7 +30,15 @@ function [corr_data_osffts, H_estimated] = channel_equalization(training_osfft, 
 %      * Channel evolution over time as a heatmap.
 %   4. Computes the RMS delay spread based on the PDP.
 %   5. Calls `spectral_efficiency_analysis` to analyze system efficiency.
-
+%
+%   Example:
+%       conf.N_subcarriers = 64;
+%       conf.f_s = 1e6;
+%       conf.plot = true;
+%       [corr_data, H] = channel_equalization(training_osfft, tx_symbols, data_osffts, conf);
+%
+%   See also: spectral_efficiency_analysis
+%
     N_subcarriers = conf.N_subcarriers;
     % Estimate the channel response (H for each subcarrier)
     H_estimated = training_osfft ./ tx_training_symbols; % Size: [N_subcarriers, 1]

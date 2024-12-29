@@ -1,3 +1,10 @@
+%   This file creates a bar plot of Bit Error Rate (BER) values
+%   for specified conditions, sorted in ascending order, and saves
+%   the plot as an image file.
+%   This code is used to generate the histogram plot shown in the pptx
+%   and project report.
+
+
 % Define the conditions and BER values
 conditions = {'Ideal', '4000Hz noise', 'Obstacles', 'Low volume'};
 BER_values = [0.42, 8.4, 8.72, 4.26]; % Values in percentages

@@ -18,15 +18,15 @@ function [txsignal conf] = tx(txbits,conf,k)
     training_bits = lfsr_framesync(conf.N_subcarriers); % 256-bit training
     training_symbols = -2 * (training_bits) + 1;  % BPSK mapping   
 
-    %plot_constellations(training_symbols, 'BPSK training symbols');
+    if conf.plot
+        plot_constellations(training_symbols, 'BPSK training symbols');
+    end
 
     %% OFDM training through osIFFT
     training_osifft = osifft(training_symbols, conf.os_factor);
-    reverted_symbols = osfft(training_osifft, conf.os_factor);
-    %plot_constellations(reverted_symbols, 'Reverted BPSK training symbols');
     % add cyclic prefix
     % Calculate the index for the second half
-    mid_idx = ceil(length(training_osifft) / 2)+1; % Find the midpoint of training_osifft
+    mid_idx = ceil(length(training_osifft)*(1-conf.cp))+1; % Find the midpoint of training_osifft
     
     % Select the second half as the cyclic prefix
     cyclic_prefix_training = training_osifft(mid_idx:end);
@@ -45,27 +45,26 @@ function [txsignal conf] = tx(txbits,conf,k)
     imag_p = ((bits2(2,:) > 0) - 0.5) * sqrt(2);
     symbols = real_p + 1i * imag_p;
 
-    plot_constellations(symbols, 'QPSK data symbols');
 
-
-    %% Check data size is multiple of N (256) => add padding, mention for presentation
+    if conf.plot
+        plot_constellations(symbols, 'QPSK data symbols');
+    end
 
     %% OFDM data through osIFFT
     num_packets = length(symbols)/conf.N_subcarriers;
     cp_data_osifft = [];
 
     for i=1:num_packets
-        packet_osifft = osifft(symbols((i-1)*256+1:i*256), conf.os_factor);
+        packet_osifft = osifft(symbols((i-1)*conf.N_subcarriers+1:i*conf.N_subcarriers), conf.os_factor);
         % add 50% of packet_osifft as cyclic prefix
-        mid_idx = ceil(length(packet_osifft) / 2)+1;
+        mid_idx = ceil(length(packet_osifft)*(1-conf.cp))+1;
         cyclic_prefix = packet_osifft(mid_idx:end);
         packet_osifft = [cyclic_prefix; packet_osifft];
         % P/S 
         cp_data_osifft = [cp_data_osifft; packet_osifft];
     end
     
-    %% normaliser
-
+    %% normalise
     cp_data_osifft = cp_data_osifft/sqrt(mean(abs(cp_data_osifft).^2));
 
     %% Pulse shape preamble
@@ -74,8 +73,8 @@ function [txsignal conf] = tx(txbits,conf,k)
 
     %% crop preamble convolutions 
     filtered_preamble = filtered_preamble(1+(length(pulse)-1)/2:end-(length(pulse)-1)/2);
-    %% normaliser preamble
-    
+
+    %% normalise preamble
     filtered_preamble = filtered_preamble / sqrt(mean(abs(filtered_preamble).^2));
     
     %% Combine preamble, OFDM training, OFDM data
@@ -86,7 +85,6 @@ function [txsignal conf] = tx(txbits,conf,k)
     time = (0:length(tx_signal)-1).' / conf.f_s;
 
     % Generate the complex exponential carrier
-    % SHOULD WE TAKE fc/fs * n?
     complex_carrier = exp(1i * 2 * pi * conf.f_c * time);
 
     % Perform up-conversion
@@ -94,23 +92,13 @@ function [txsignal conf] = tx(txbits,conf,k)
 
     % Take the real part of the upconverted signal
     txsignal = real(upconverted_signal);
-%     disp('Txsignal: ');
-%     disp(size(txsignal));
-    % The code below is to ensure the relative lengths of the different
-    % segments are coherent
-   % assert(length(cp_training_osifft)==(length(cp_data_osifft)/num_packets));
-%     disp('Preamble signal: ');
-%     disp(size(filtered_preamble));
-%     disp('Training signal with CP: ');
-%     disp(size(cp_training_osifft));
-%     disp('Data signal with CP: ');
-%     disp(size(cp_data_osifft));
-
-
+   
 
     % Plot txsignal
-    %plot_txsignal(filtered_preamble, cp_training_osifft, cp_data_osifft, txsignal, conf, num_packets);
-    plot_spectrum(txsignal, conf.f_s, 'Spectrum of the transmitted signal')
+    if conf.plot
+        plot_txsignal(filtered_preamble, cp_training_osifft, cp_data_osifft, txsignal, conf, num_packets);
+        plot_spectrum(txsignal, conf.f_s, 'Spectrum of the transmitted signal');
+    end
 
 
 end

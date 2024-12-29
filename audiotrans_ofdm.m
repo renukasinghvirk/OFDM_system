@@ -19,19 +19,17 @@ conf.f_sym   = 100;     % symbol rate
 conf.nframes = 1;       % number of frames to transmit
 conf.modulation_order = 2; % BPSK:1, QPSK:2
 conf.f_c     = 4000;
-
 conf.npreamble  = 100; %(= number of symbols because BPSK)
 conf.bitsps     = 16;   % bits per audio sample
 conf.offset     = 0;
-
-%% je rajoute ca
 conf.datatype = 'random'; % Values: 'random', 'image'
 conf.synchronization = 'channel_equalization'; % Values: 'naive', 'channel_equalization'
 conf.N_subcarriers = 256;
-conf.nbits   = (conf.N_subcarriers*2)*2;    % number of bits => 1000 symbols because QPSK
+conf.nbits   = (conf.N_subcarriers*2)*4;    % number of bits => 1000 symbols because QPSK
 conf.spacing = 5;
 conf.os_factor = conf.f_s / (conf.spacing*conf.N_subcarriers);
-
+conf.cp = 0.5;
+conf.plot = true;
 
 % Init Section
 % all calculations that you only have to do once
@@ -133,6 +131,7 @@ for k=1:conf.nframes
             rxsignal    = rawrxsignal(1:end,1);
         end
         
+
     % MATLAB audio mode
     elseif strcmp(conf.audiosystem,'matlab')
         disp('MATLAB generic');
@@ -178,7 +177,7 @@ ber_ideal = ber;
 if strcmp(conf.datatype, 'image')
     figure('Name', 'Received Image'); % Create a new figure for the image
     image = image_decoder(rxbits, [32,32]);
-    imshow(image, 'InitialMagnification', 'fit', 'XData', [0 32], 'YData', [0 32]); % Scales the display to 64x64
+    imshow(image, 'InitialMagnification', 'fit', 'XData', [0 32], 'YData', [0 32]); % Scale the display to 64x64
     axis on; 
     title('Received image', FontSize=30);
 end

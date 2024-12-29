@@ -19,17 +19,19 @@ time_vector = (0:length(rxsignal)-1) / conf.f_s; % Time in seconds
     
 %Plot the received signal
 %time domain
-fontsize = 30;
-figure('Units', 'pixels', 'Position', [100, 100, 4000, 200]);
-plot(time_vector, rxsignal, 'Color', [0.678, 0.478, 0.902, 1]); % Plot the transmitted signal
-xlabel('Time (s)', 'FontSize', fontsize);
-ylabel('Amplitude', 'FontSize', fontsize);
-title('Received Signal', 'FontSize', fontsize);
-ax = gca;
-ax.FontSize = 20;
+if conf.plot
+    fontsize = 30;
+    figure('Units', 'pixels', 'Position', [100, 100, 4000, 200]);
+    plot(time_vector, rxsignal, 'Color', [0.678, 0.478, 0.902, 1]); % Plot the transmitted signal
+    xlabel('Time (s)', 'FontSize', fontsize);
+    ylabel('Amplitude', 'FontSize', fontsize);
+    title('Received Signal', 'FontSize', fontsize);
+    ax = gca;
+    ax.FontSize = 20;
 
-%spectrum
-plot_spectrum(rxsignal, conf.f_s, 'Spectrum of the received signal')
+    %spectrum
+    plot_spectrum(rxsignal, conf.f_s, 'Spectrum of the received signal')
+end
 
 
 %% Down-conversion
@@ -42,19 +44,23 @@ complex_carrier = exp(1i * 2 * pi * -conf.f_c * time);
     
 % Perform down-conversion
 downconverted_signal = rxsignal .* complex_carrier;
-plot_spectrum(downconverted_signal, conf.f_s, 'Spectrum of the downconverted Rx signal')
+if conf.plot
+    plot_spectrum(downconverted_signal, conf.f_s, 'Spectrum of the downconverted Rx signal');
+end
 
 
 %% Lowpass the signal 
 rxsignal_bb = ofdmlowpass(downconverted_signal, conf, conf.f_c); 
-plot_spectrum(rxsignal_bb, conf.f_s, 'Spectrum of the lowpass, downconverted Rx signal')
+if conf.plot
+    plot_spectrum(rxsignal_bb, conf.f_s, 'Spectrum of the lowpass, downconverted Rx signal');
+end
 
 %% Find preamble 
 [start_idx,phase_of_peak,~] = find_preamble(rxsignal_bb, conf);
 
 %% Isolate training OFDM signal
-cp_len = conf.os_factor*conf.N_subcarriers/2;
-ofdm_symbol_len = 2*cp_len;
+cp_len = conf.os_factor*conf.N_subcarriers*conf.cp;
+ofdm_symbol_len = conf.os_factor*conf.N_subcarriers;
 training_start = start_idx+cp_len;
 training_end = training_start+ofdm_symbol_len-1;
 training_signal = rxsignal_bb(training_start:training_end);
@@ -67,11 +73,6 @@ tx_training_bits = lfsr_framesync(conf.N_subcarriers); % 256-bit training
 tx_training_symbols = -2 * (tx_training_bits) + 1;  % BPSK mapping
 
 if strcmp(conf.synchronization, 'naive')
-    % USE naive phase correction method
-    % Define parameters for OFDM processing
-    cp_len = conf.os_factor * conf.N_subcarriers / 2;
-    ofdm_symbol_len = 2 * cp_len;
-    
     % Call naive_phase_correction function
     [data_osffts, corr_data_osffts] = naive_phase_correction(training_osfft, tx_training_symbols, rxsignal_bb, conf, training_end, cp_len, ofdm_symbol_len);
 elseif strcmp(conf.synchronization, 'channel_equalization')
@@ -104,15 +105,20 @@ end
 
 %% PHASE TRACKING
 
-plot_constellations(corr_data_osffts, 'Corrected recovered data symbols by channel equalization');
+if conf.plot
+    plot_constellations(corr_data_osffts, 'Corrected recovered data symbols by channel equalization');
+end
 
 corr_data_osffts = phase_tracking(corr_data_osffts, training_osfft, tx_training_symbols, conf);
-plot_constellations(corr_data_osffts, 'Corrected recovered data symbols by phase tracking');
+if conf.plot 
+    plot_constellations(corr_data_osffts, 'Corrected recovered data symbols by phase tracking');
+end
 
 recovered_bits = demapper(corr_data_osffts);
-
-plot_constellations(data_osffts, 'Recovered data symbols');
-drawnow;
+if conf.plot
+    plot_constellations(data_osffts, 'Recovered data symbols');
+    drawnow;
+end
 %% Demapping
 % decode bits
 rxbits = recovered_bits;

@@ -1,5 +1,5 @@
 function plot_spectrum(signal, fs, title_str)
-    %PLOT_SPECTRUM Visualizes the spectrum of a given signal
+    %       PLOT_SPECTRUM Visualizes the spectrum of a given signal
     %   Inputs:
     %       signal    : The input signal (time domain)
     %       fs        : Sampling frequency in Hz

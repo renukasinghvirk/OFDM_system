@@ -1,5 +1,5 @@
 function [payload_data] = phase_tracking(corr_data_osffts, training_osfft, tx_training_symbols, conf)
-%PHASE_TRACKING Performs phase tracking for each subcarrier and packet
+%   PHASE_TRACKING Performs phase tracking for each subcarrier and packet
 %
 % Inputs:
 %   corr_data_osffts    - Frequency-domain received data symbols (corrected for magnitude)

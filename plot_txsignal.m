@@ -1,5 +1,5 @@
 function plot_txsignal(filtered_preamble, cp_training_osifft, cp_data_osifft, txsignal, conf, num_packets)
-    %PLOT_TXSIGNAL Plots the transmitted signal with sections highlighted
+    %       PLOT_TXSIGNAL Plots the transmitted signal with sections highlighted
     %
     %   Inputs:
     %       filtered_preamble  : Preamble signal (time-domain)
@@ -16,7 +16,7 @@ function plot_txsignal(filtered_preamble, cp_training_osifft, cp_data_osifft, tx
     
     % Generate indices for each section
     preamble_end = preamble_len;
-    cp_training_end = preamble_end + (1/3)*training_len;
+    cp_training_end = preamble_end + (conf.cp/(conf.cp+1))*training_len;
     training_end = preamble_end + training_len;
     ofdm_start = training_end + 1;
     ofdm_end = ofdm_start + data_len - 1;
@@ -56,7 +56,7 @@ function plot_txsignal(filtered_preamble, cp_training_osifft, cp_data_osifft, tx
         % Calculate start and end indices for the current symbol
         symbol_start = training_end + 1 + (i-1) * training_len;
         cp_start = symbol_start;                            % Start of cyclic prefix
-        cp_end = cp_start+(1/3)*training_len;               % End of cyclic prefix
+        cp_end = cp_start+(conf.cp/(conf.cp+1))*training_len;               % End of cyclic prefix
         symbol_end = cp_start+training_len;                 % End of current OFDM symbol
         
         xline(cp_end/conf.f_s, ':k', 'LineWidth', 2, 'LabelHorizontalAlignment', 'left');
