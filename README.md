@@ -18,7 +18,7 @@ The bit error rate (BER) is computed at the end of the transmission, which can c
 ### Results
 Below are some of the results obtained using various methods.
 <p align="center">
-  <img src=pictures/readme.png width="380">
+  <img src=pictures/readme.png width="680">
 <p align="center"
 </p>
 Fig.1 : Results
